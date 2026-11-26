@@ -1,0 +1,95 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lava
+      POSTGRES_USER: lava
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?configure POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    stop_grace_period: 135s
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-ec", "/migrate && exec /server"]
+    environment:
+      APP_ENV: production
+      GIN_MODE: release
+      DATABASE_URL: postgres://lava:${POSTGRES_PASSWORD:?configure POSTGRES_PASSWORD}@db:5432/lava?sslmode=disable
+      DB_MAX_OPEN_CONNS: ${DB_MAX_OPEN_CONNS:-50}
+      COOKIE_SECURE: "true"
+      GATEWAY_CLIENT_IP_REQUIRED: "true"
+      GATEWAY_TOKEN: ${GATEWAY_TOKEN:?configure GATEWAY_TOKEN}
+      JWT_SECRET: ${JWT_SECRET:?configure JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?configure ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?configure ADMIN_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      CLIENTE_ORIGIN: ${CLIENTE_ORIGIN:?configure CLIENTE_ORIGIN}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      CORS_ORIGINS: "${ADMIN_ORIGIN:?configure ADMIN_ORIGIN},${CLIENTE_ORIGIN:?configure CLIENTE_ORIGIN}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:8080/readyz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+      args:
+        APP_DIR: front/my-app
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      BACKEND_URL: http://app:8080
+      APP_ORIGIN: ${ADMIN_ORIGIN:?configure ADMIN_ORIGIN}
+      GATEWAY_TOKEN: ${GATEWAY_TOKEN:?configure GATEWAY_TOKEN}
+      TRUSTED_CLIENT_IP_HEADER: X-Real-IP
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    expose:
+      - "3000"
+
+  cliente:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+      args:
+        APP_DIR: frontc/my-app
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      BACKEND_URL: http://app:8080
+      APP_ORIGIN: ${CLIENTE_ORIGIN:?configure CLIENTE_ORIGIN}
+      GATEWAY_TOKEN: ${GATEWAY_TOKEN:?configure GATEWAY_TOKEN}
+      TRUSTED_CLIENT_IP_HEADER: X-Real-IP
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    expose:
+      - "3000"
+
+volumes:
+  pgdata:

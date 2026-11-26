@@ -1,0 +1,21 @@
+services:
+  db:
+    restart: unless-stopped
+  app:
+    restart: unless-stopped
+    stop_grace_period: 135s
+    environment:
+      APP_ENV: production
+      GIN_MODE: release
+      COOKIE_SECURE: "true"
+      GATEWAY_CLIENT_IP_REQUIRED: "true"
+      GATEWAY_TOKEN: ${GATEWAY_TOKEN:?configure GATEWAY_TOKEN}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:?configure HTTPS panel origins}
+      CLIENTE_ORIGIN: ${CLIENTE_ORIGIN:?configure CLIENTE_ORIGIN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+  admin:
+    restart: unless-stopped
+  cliente:
+    restart: unless-stopped

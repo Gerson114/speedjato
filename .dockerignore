@@ -1,0 +1,21 @@
+# Não copiar segredos nem lixo para a imagem
+.env
+.git
+.gitignore
+*.md
+Dockerfile
+docker-compose.yml
+
+.env.*
+*.pem
+*.key
+
+*.db
+*.db-*
+.agents
+.codex
+.aws
+front/
+
+frontc/
+backups/

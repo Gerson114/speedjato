@@ -1,0 +1,15 @@
+/lava.db
+/lava.db-*
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+.env
+.env.*
+!.env.example
+*.exe
+*.out
+/server
+
+/backups/

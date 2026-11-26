@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lava}
+      POSTGRES_USER: ${POSTGRES_USER:-lava}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      GIN_MODE: ${GIN_MODE:-debug}
+      PGHOST: db
+      PGDATABASE: ${POSTGRES_DB:-lava}
+      PGUSER: ${POSTGRES_USER:-lava}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      PGSSLMODE: disable
+      DB_MAX_OPEN_CONNS: ${DB_MAX_OPEN_CONNS:-50}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3100}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      CLIENTE_ORIGIN: ${CLIENTE_ORIGIN:-http://localhost:3000}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?defina ADMIN_EMAIL no .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      GATEWAY_TOKEN: ${GATEWAY_TOKEN:-}
+      GATEWAY_CLIENT_IP_REQUIRED: ${GATEWAY_CLIENT_IP_REQUIRED:-false}
+    ports:
+      - "127.0.0.1:${PORT:-8081}:8080"
+
+volumes:
+  pgdata:
