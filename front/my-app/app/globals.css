@@ -373,3 +373,15 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
   .painel button { transition: none; }
   .painel button:not(:disabled):active { transform: none; }
 }
+
+@keyframes modal-fundo-sair { to { opacity: 0; } }
+@keyframes modal-sair { to { opacity: 0; transform: translateY(18px) scale(.98); } }
+@keyframes modal-descer { to { transform: translateY(100%); } }
+.modal-fundo.modal-saindo { animation: modal-fundo-sair 240ms ease-in both; pointer-events: none; }
+.modal-fundo.modal-saindo > :is(.modal-detalhes, .confirmar-exclusao) { animation: modal-sair 240ms ease-in both; }
+@media (max-width: 600px) {
+  .modal-fundo.modal-saindo > .modal-detalhes { animation: modal-descer 240ms ease-in both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-fundo.modal-saindo, .modal-fundo.modal-saindo > :is(.modal-detalhes, .confirmar-exclusao) { animation: none; }
+}

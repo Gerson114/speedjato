@@ -1,3 +1,4 @@
+import { fecharModal } from "../fechar-modal";
 "use client";
 
 import { acompanhar } from "../../acompanhar";
@@ -132,7 +133,7 @@ export function Servicos({ requisitar }: { requisitar: Requisitar }) {
   }
   return (
     <section>
-      {exclusaoPendente && <div className="modal-fundo" onMouseDown={e => {if (e.target === e.currentTarget && !salvando) setExclusaoPendente(null)}}><section className="confirmar-exclusao confirmar-servico" role="alertdialog" aria-modal="true" aria-labelledby="confirmar-exclusao-titulo" aria-describedby="confirmar-exclusao-descricao"><div className="confirmar-servico-icone" aria-hidden="true"><Icone nome="servicos" /></div><h2 id="confirmar-exclusao-titulo">Excluir serviço?</h2><p id="confirmar-exclusao-descricao">O serviço <strong>{exclusaoPendente.nome}</strong> será retirado do catálogo.</p><p className="confirmar-servico-nota">Os agendamentos existentes continuam no histórico.</p><div className="modal-acoes"><button type="button" className="secundario" disabled={salvando} onClick={() => setExclusaoPendente(null)}>Cancelar</button><button type="button" className="excluir-produto" disabled={salvando} onClick={() => void excluir(exclusaoPendente)}>{salvando ? "Excluindo…" : "Excluir serviço"}</button></div></section></div>}
+      {exclusaoPendente && <div className="modal-fundo" onMouseDown={e => {if (e.target === e.currentTarget && !salvando) fecharModal(e.currentTarget, () => setExclusaoPendente(null))}}><section className="confirmar-exclusao confirmar-servico" role="alertdialog" aria-modal="true" aria-labelledby="confirmar-exclusao-titulo" aria-describedby="confirmar-exclusao-descricao"><div className="confirmar-servico-icone" aria-hidden="true"><Icone nome="servicos" /></div><h2 id="confirmar-exclusao-titulo">Excluir serviço?</h2><p id="confirmar-exclusao-descricao">O serviço <strong>{exclusaoPendente.nome}</strong> será retirado do catálogo.</p><p className="confirmar-servico-nota">Os agendamentos existentes continuam no histórico.</p><div className="modal-acoes"><button type="button" className="secundario" disabled={salvando} onClick={e => fecharModal(e.currentTarget, () => setExclusaoPendente(null))}>Cancelar</button><button type="button" className="excluir-produto" disabled={salvando} onClick={() => void excluir(exclusaoPendente)}>{salvando ? "Excluindo…" : "Excluir serviço"}</button></div></section></div>}
       <div className="titulo">
         <div>
           <h1>Serviços</h1>
