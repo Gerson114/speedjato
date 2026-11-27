@@ -153,6 +153,7 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
   const [abrirAgendamento,setAbrirAgendamento]=useState(false);
   const [selecionada,setSelecionada]=useState<Reserva|null>(null);
   const [salvandoStatus,setSalvandoStatus]=useState(false);
+  const [confirmarCancelamento, setConfirmarCancelamento] = useState(false);
   useEffect(() => {
     let versaoExibida: string | undefined;
     return acompanharDados(async signal => {
@@ -291,7 +292,8 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
                     </button>
                   ))}
                 </div>
-              ) : selecionada.status === "cancelado" ? "Cancelada" : !selecionada.chegou && selecionada.status === "confirmado" ? "Registre a chegada para alterar o andamento" : etapas[selecionada.lavagemStatus]}</dd></div></dl>{!acoes && <p role="status">A API não informou as ações disponíveis para este agendamento.</p>}{erro && <p className="erro" role="alert">{erro}</p>}<div className="modal-acoes"><button className="secundario" disabled={salvandoStatus || !acoes?.cancelar} onClick={() => { if (window.confirm("Cancelar o agendamento de " + selecionada.cliente + "?")) alterarStatus("cancelado"); }}>{salvandoStatus ? "Salvando…" : "Cancelar agendamento"}</button><button className="primario" disabled={salvandoStatus || !acoes?.confirmar} onClick={() => alterarStatus("confirmado")}>{selecionada.status === "confirmado" ? "Agendamento confirmado" : "Confirmar agendamento"}</button></div></section></div>}
+              ) : selecionada.status === "cancelado" ? "Cancelada" : !selecionada.chegou && selecionada.status === "confirmado" ? "Registre a chegada para alterar o andamento" : etapas[selecionada.lavagemStatus]}</dd></div></dl>{!acoes && <p role="status">A API não informou as ações disponíveis para este agendamento.</p>}{erro && <p className="erro" role="alert">{erro}</p>}<div className="modal-acoes"><button className="secundario" disabled={salvandoStatus || !acoes?.cancelar} onClick={() => setConfirmarCancelamento(true)}>{salvandoStatus ? "Salvando…" : "Cancelar agendamento"}</button><button className="primario" disabled={salvandoStatus || !acoes?.confirmar} onClick={() => alterarStatus("confirmado")}>{selecionada.status === "confirmado" ? "Agendamento confirmado" : "Confirmar agendamento"}</button></div></section></div>}
+      {confirmarCancelamento && selecionada && <div className="modal-fundo" onMouseDown={e => { if (e.target === e.currentTarget && !salvandoStatus) setConfirmarCancelamento(false); }}><section className="confirmar-exclusao" role="alertdialog" aria-modal="true" aria-labelledby="cancelar-agendamento-titulo"><h2 id="cancelar-agendamento-titulo">Cancelar agendamento?</h2><p>Deseja cancelar o agendamento de {selecionada.cliente}?</p><div className="modal-acoes"><button className="secundario" disabled={salvandoStatus} onClick={() => setConfirmarCancelamento(false)}>Voltar</button><button className="primario" disabled={salvandoStatus} onClick={async () => { await alterarStatus("cancelado"); setConfirmarCancelamento(false); }}>{salvandoStatus ? "Cancelando…" : "Sim, cancelar agendamento"}</button></div></section></div>}
       {abrirAgendamento && <AgendarBalcao diaInicial={data} requisitar={requisitar} fechar={() => setAbrirAgendamento(false)} concluido={dia => { setAbrirAgendamento(false); atualizar(dia); }} />}
     </section>
   );
