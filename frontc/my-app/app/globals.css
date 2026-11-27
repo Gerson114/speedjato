@@ -235,3 +235,6 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 .grade-horarios button[aria-pressed=true]{background:#123d6a;border-color:#123d6a;color:#fff}
 .grade-horarios button[aria-pressed=true] span{color:#e2ecf5}
 .grade-horarios button:disabled{opacity:.45;cursor:not-allowed;background:#f0f1f2;color:#717a84}
+
+.logo-speedjato { display: block; width: 112px; height: auto; filter: drop-shadow(0 1px 1px #15243899); }
+.topbar-marca .logo-speedjato { width: 72px; }

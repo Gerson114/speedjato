@@ -1,5 +1,6 @@
 "use client";
 import { acompanhar } from "../acompanhar";
+import Image from "next/image";
 import Script from "next/script";
 import Link from "next/link";
 import{useEffect,useState,type FormEvent}from"react";
@@ -159,7 +160,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
  async function agendar(){setErro("");try{const reserva=await api<Reserva>("agendamentos","POST",{servicoId:Number(servico),veiculoId:Number(veiculo),data,inicio:hora});setReservas([reserva,...reservas]);setSecao("agendamentos");setMensagem("Horário reservado com sucesso.");}catch(e){setErro((e as Error).message)}}
  if (!logado && autenticando) return (
   <main className="entrada-cliente">
-   <Link href="/" className="marca"><span className="simbolo" aria-hidden="true"><i/><i/><i/></span>SpeedJato</Link>
+   <Link href="/" className="marca"><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /></Link>
    <section className={`entrada-card ${modo === "cadastro" ? "modo-cadastro" : "modo-login"}`}>
     <div className="entrada-chamada">
      <p className="dash-etiqueta">CUIDADO PARA O SEU CARRO</p>
@@ -212,7 +213,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
  return <main className="cliente-shell">
   {menuAberto&&<button className="menu-sombra" aria-label="Fechar menu" onClick={()=>setMenuAberto(false)}/>}
   <aside id="menu-cliente" className={`menu-cliente ${menuAberto?"menu-aberto":""}`}>
-   <Link href="/" className="marca"><span className="simbolo" aria-hidden="true"><i/><i/><i/></span>SpeedJato</Link>
+   <Link href="/" className="marca"><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /></Link>
    <p className="menu-legenda">MENU PRINCIPAL</p>
    <nav className="menu-links" aria-label="Menu do cliente">
     <button className={secao==="servicos"?"ativo":""} aria-current={secao==="servicos"?"page":undefined} onClick={()=>trocarSecao("servicos")}><span aria-hidden="true">▦</span>Serviços</button>
@@ -224,7 +225,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
    {logado ? <div className="menu-rodape"><div className="perfil-cliente"><span className="perfil-selo">{email?email.charAt(0).toUpperCase():"C"}</span><span><strong>Área do cliente</strong><small>Seus agendamentos</small></span></div><button className="menu-sair" onClick={sair}><span aria-hidden="true">↪</span>Sair da conta</button></div> : <button className="menu-sair" onClick={() => {setModo("login");setAutenticando(true);setMenuAberto(false)}}>Entrar</button>}
   </aside>
   <div className="cliente-conteudo">
-   <header className="cliente-topbar"><button className="menu-toggle" onClick={()=>setMenuAberto(true)} aria-label="Abrir menu" aria-controls="menu-cliente" aria-expanded={menuAberto}><span/><span/><span/></button><div><p className="dash-etiqueta">ÁREA DO CLIENTE</p><strong>{secao==="servicos"?"Agende sua lavagem":secao==="veiculos"?"Meus veículos":secao==="agendamentos"?"Meus agendamentos":secao==="conta"?"Minha conta":"Avisos e lembretes"}</strong></div><span className="topbar-marca"><span className="simbolo" aria-hidden="true"><i/><i/><i/></span>SpeedJato</span></header>
+   <header className="cliente-topbar"><button className="menu-toggle" onClick={()=>setMenuAberto(true)} aria-label="Abrir menu" aria-controls="menu-cliente" aria-expanded={menuAberto}><span/><span/><span/></button><div><p className="dash-etiqueta">ÁREA DO CLIENTE</p><strong>{secao==="servicos"?"Agende sua lavagem":secao==="veiculos"?"Meus veículos":secao==="agendamentos"?"Meus agendamentos":secao==="conta"?"Minha conta":"Avisos e lembretes"}</strong></div><span className="topbar-marca"><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /></span></header>
    {seletorAberto && <div className="seletor-fundo" onMouseDown={e => { if (e.target === e.currentTarget) setSeletorAberto(null); }} onKeyDown={e => { if (e.key === "Escape") setSeletorAberto(null); }}><section className="seletor-modal" role="dialog" aria-modal="true" aria-labelledby="seletor-titulo"><div className="seletor-topo"><h2 id="seletor-titulo">{seletorAberto === "veiculo" ? "Escolha seu veículo" : seletorAberto === "hora" ? "Escolha o horário" : "Escolha o dia"}</h2><button type="button" autoFocus onClick={() => setSeletorAberto(null)} aria-label="Fechar">×</button></div>{seletorAberto === "veiculo" ? <div className="seletor-veiculos">{carros.map(c => <button type="button" key={c.id} aria-pressed={String(c.id) === veiculo} onClick={() => { setVeiculo(String(c.id)); setSeletorAberto(null); }}><strong>{c.modelo}</strong><span>{c.placa}{c.cor ? ` · ${c.cor}` : ""}</span></button>)}</div> : seletorAberto === "hora" ? <div className="seletor-horarios"><p>Selecione um horário disponível para sua lavagem.</p><div className="grade-horarios">{horarios.map(h => <button type="button" key={h} disabled={ocupados.includes(h)} aria-pressed={hora === h} onClick={() => { setHora(h); setSeletorAberto(null); }}><strong>{h}</strong><span>{ocupados.includes(h) ? "Ocupado" : "Disponível"}</span></button>)}</div></div> : <Calendario hoje={hoje} valor={data} selecionar={dia => { setData(dia); setHora(""); setHorarios([]); setOcupados([]); setSeletorAberto(null); }} />}</section></div>}
    <div className="cliente-pagina">
     {erro&&<p role="alert" className="erro">{erro}</p>}{mensagem&&<p role="status" className="sucesso">{mensagem}</p>}
@@ -268,7 +269,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
      <section className="avisos-lista">{avisos.length===0?<div className="estado-vazio">Você verá aqui as atualizações dos seus agendamentos.</div>:avisos.map(a=><article key={a.id}><span className="aviso-sinal" aria-hidden="true">•</span><div><strong>{a.mensagem}</strong><time>{a.criadoEm}</time></div></article>)}</section>
     </>}
    </div>
-   <footer className="cliente-footer"><div><strong>SpeedJato<span>.</span></strong><p>Cuidado para o seu carro, no seu tempo.</p></div><nav aria-label="Navegação do rodapé"><button onClick={()=>trocarSecao("servicos")}>Serviços</button><button onClick={()=>trocarSecao("veiculos")}>Meus veículos</button><button onClick={()=>trocarSecao("agendamentos")}>Agendamentos</button></nav><small>© {new Date().getFullYear()} SpeedJato · Área do cliente</small></footer>
+   <footer className="cliente-footer"><div><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /><p>Cuidado para o seu carro, no seu tempo.</p></div><nav aria-label="Navegação do rodapé"><button onClick={()=>trocarSecao("servicos")}>Serviços</button><button onClick={()=>trocarSecao("veiculos")}>Meus veículos</button><button onClick={()=>trocarSecao("agendamentos")}>Agendamentos</button></nav><small>© {new Date().getFullYear()} SpeedJato · Área do cliente</small></footer>
   </div>
  </main>;
 }

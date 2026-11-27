@@ -385,3 +385,6 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 @media (prefers-reduced-motion: reduce) {
   .modal-fundo.modal-saindo, .modal-fundo.modal-saindo > :is(.modal-detalhes, .confirmar-exclusao) { animation: none; }
 }
+
+.logo-speedjato { display: block; width: 112px; height: auto; filter: drop-shadow(0 1px 1px #15243899); }
+.topbar-marca .logo-speedjato { width: 72px; }

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export type Servico = { id: number; nome: string; duracaoMinutos: number; precoCentavos: number; descricao: string; itens: string[]; produtoIds: number[]; produtos: {id:number;nome:string}[] };
 export type Reserva = {
   id: number;
@@ -68,14 +70,7 @@ export function mensagem(e: unknown) {
 }
 export function Marca() {
   return (
-    <span className="marca" aria-label="SpeedJato">
-      <span aria-hidden="true" className="simbolo">
-        <i />
-        <i />
-        <i />
-      </span>
-      SpeedJato
-    </span>
+    <span className="marca"><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /></span>
   );
 }
 
