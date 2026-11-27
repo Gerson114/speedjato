@@ -269,7 +269,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
      <section className="avisos-lista">{avisos.length===0?<div className="estado-vazio">Você verá aqui as atualizações dos seus agendamentos.</div>:avisos.map(a=><article key={a.id}><span className="aviso-sinal" aria-hidden="true">•</span><div><strong>{a.mensagem}</strong><time>{a.criadoEm}</time></div></article>)}</section>
     </>}
    </div>
-   <footer className="cliente-footer"><div><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /><p>Cuidado para o seu carro, no seu tempo.</p></div><nav aria-label="Navegação do rodapé"><button onClick={()=>trocarSecao("servicos")}>Serviços</button><button onClick={()=>trocarSecao("veiculos")}>Meus veículos</button><button onClick={()=>trocarSecao("agendamentos")}>Agendamentos</button></nav><small>© {new Date().getFullYear()} SpeedJato · Área do cliente</small></footer>
+   <footer className="cliente-footer"><div><Image src="/speedjato.webp" width={594} height={314} alt="SpeedJato" className="logo-speedjato" /><p>Cuidado para o seu carro, no seu tempo.</p></div><nav aria-label="Navegação do rodapé"><button onClick={()=>trocarSecao("servicos")}>Serviços</button><button onClick={()=>trocarSecao("veiculos")}>Meus veículos</button><button onClick={()=>trocarSecao("agendamentos")}>Agendamentos</button></nav><small>© {new Date().getFullYear()} SpeedJato · Área do cliente · Feito por <a href="https://chonnostech.com" target="_blank" rel="noopener noreferrer">Chonnos Tech</a></small></footer>
   </div>
  </main>;
 }
