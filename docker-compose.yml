@@ -63,7 +63,7 @@ services:
       BACKEND_URL: http://app:8080
       APP_ORIGIN: ${ADMIN_ORIGIN:?configure ADMIN_ORIGIN}
       GATEWAY_TOKEN: ${GATEWAY_TOKEN:?configure GATEWAY_TOKEN}
-      TRUSTED_CLIENT_IP_HEADER: X-Real-IP
+      TRUSTED_CLIENT_IP_HEADER: X-Forwarded-For
       PORT: "3000"
       HOSTNAME: 0.0.0.0
     expose:
@@ -84,7 +84,7 @@ services:
       BACKEND_URL: http://app:8080
       APP_ORIGIN: ${CLIENTE_ORIGIN:?configure CLIENTE_ORIGIN}
       GATEWAY_TOKEN: ${GATEWAY_TOKEN:?configure GATEWAY_TOKEN}
-      TRUSTED_CLIENT_IP_HEADER: X-Real-IP
+      TRUSTED_CLIENT_IP_HEADER: X-Forwarded-For
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       PORT: "3000"
       HOSTNAME: 0.0.0.0
