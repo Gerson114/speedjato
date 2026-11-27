@@ -218,6 +218,27 @@ func (a api) salvarServico(c *gin.Context) {
 	defer tx.Rollback()
 	status := http.StatusCreated
 	if c.Request.Method == http.MethodPost {
+		// Formulários reabertos têm chaves diferentes. Serialize a comparação
+		// para que dois cadastros simultâneos do mesmo serviço vejam o mesmo ID.
+		if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(28011, hashtext(lower(trim($1))))", s.Nome); err != nil {
+			falha(c, err)
+			return
+		}
+		const mesmoServico = ` WHERE NOT s.excluido AND lower(trim(s.nome))=lower(trim($1))
+			AND s.duracao=$2 AND s.preco_centavos=$3 AND s.descricao=$4 AND s.itens=$5
+			AND ARRAY(SELECT produto_id::bigint FROM servico_produtos WHERE servico_id=s.id ORDER BY produto_id)
+			  = ARRAY(SELECT DISTINCT id FROM unnest($6::bigint[]) AS ids(id) ORDER BY id)
+			ORDER BY s.id LIMIT 1`
+		existente, buscaErr := lerServicoDoCatalogo(tx.QueryRowContext(ctx, consultaServicos+mesmoServico,
+			s.Nome, s.Duracao, s.PrecoCentavos, s.Descricao, pq.Array(s.Itens), pq.Array(s.ProdutoIDs)))
+		if buscaErr == nil {
+			c.JSON(http.StatusOK, existente)
+			return
+		}
+		if !errors.Is(buscaErr, sql.ErrNoRows) {
+			falha(c, buscaErr)
+			return
+		}
 		err = tx.QueryRowContext(ctx, `INSERT INTO agenda_servicos (nome,duracao,preco_centavos,descricao,itens,chave_criacao)
  VALUES ($1,$2,$3,$4,$5,NULLIF($6,'')) ON CONFLICT (chave_criacao) DO NOTHING RETURNING id`, s.Nome, s.Duracao, s.PrecoCentavos, s.Descricao, pq.Array(s.Itens), s.ChaveCriacao).Scan(&s.ID)
 		if errors.Is(err, sql.ErrNoRows) {
