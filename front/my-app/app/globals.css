@@ -345,7 +345,9 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
-.agenda-cartao { animation: agenda-entrada 300ms ease-out both; }
+.painel :is(.agenda-cartao, .estoque-cartao, .dash-cartoes article, .relatorio-grids article, .catalogo li, .dia) {
+  animation: agenda-entrada 400ms ease-out both;
+}
 .modal-fundo { animation: modal-fundo-entrada 180ms ease-out both; }
 .modal-fundo > :is(.modal-detalhes, .confirmar-exclusao) {
   animation: modal-entrada 240ms ease-out both;
@@ -353,10 +355,17 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 .painel button { transition: transform 150ms ease, background-color 150ms ease, border-color 150ms ease; }
 .painel button:not(:disabled):active { transform: scale(.97); }
 @media (max-width: 600px) {
-  .modal-fundo > .modal-detalhes { animation: modal-subir 300ms cubic-bezier(.22, 1, .36, 1) both; }
+  .modal-fundo:has(> .modal-detalhes) { display: flex; align-items: flex-end; justify-content: center; padding: 0; }
+  .modal-fundo > .modal-detalhes {
+    width: 100%;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
+    animation: modal-subir 480ms cubic-bezier(.22, 1, .36, 1) both;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .agenda-cartao, .modal-fundo, .modal-fundo > :is(.modal-detalhes, .confirmar-exclusao) { animation: none; }
+  .painel :is(.agenda-cartao, .estoque-cartao, .dash-cartoes article, .relatorio-grids article, .catalogo li, .dia),
+  .modal-fundo, .modal-fundo > :is(.modal-detalhes, .confirmar-exclusao) { animation: none; }
   .painel button { transition: none; }
   .painel button:not(:disabled):active { transform: none; }
 }
