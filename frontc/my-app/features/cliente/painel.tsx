@@ -9,15 +9,15 @@ class ErroDaApi extends Error {
 }
 async function api<T>(path:string,method="GET",body?:unknown,signal?:AbortSignal):Promise<T>{const r=await fetch("/api/usuario/"+path,{method,signal,cache:"no-store",headers:body?{"Content-Type":"application/json",...(path==="google"?{"X-Requested-With":"XMLHttpRequest"}:{})}:{},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw new ErroDaApi(d.error||"Não foi possível continuar", r.status);return d}
 const reais=(v:number)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v/100);
-function SeletorHorario({horarios,ocupados,valor,aoSelecionar}:{horarios:string[];ocupados:string[];valor:string;aoSelecionar:(h:string)=>void}){
- const[horaEscolhida,setHoraEscolhida]=useState("");
- const horas=Array.from(new Set(horarios.map(h=>h.slice(0,2)))).sort();
- const horaAtual=valor?valor.slice(0,2):horaEscolhida;
- const minutos=horarios.filter(h=>h.startsWith(`${horaAtual}:`));
- return <div className="seletor-horario-caixas">
-  <label>Hora<select value={horaAtual} onChange={e=>{setHoraEscolhida(e.target.value);aoSelecionar("")}}><option value="">Escolha a hora</option>{horas.map(h=>{const opcoes=horarios.filter(x=>x.startsWith(`${h}:`));const semVaga=opcoes.every(x=>ocupados.includes(x));return <option key={h} value={h}>{h}h{semVaga?" · sem vagas":""}</option>})}</select></label>
-  <label>Minutos<select value={valor&&valor.startsWith(`${horaAtual}:`)?valor:""} disabled={!horaAtual} onChange={e=>aoSelecionar(e.target.value)}><option value="">Escolha os minutos</option>{minutos.map(h=>{const ocupado=ocupados.includes(h);return <option key={h} value={h} disabled={ocupado}>{h.slice(3)}{ocupado?" · Ocupado":""}</option>})}</select></label>
- </div>;
+function SeletorHorario({ horarios, ocupados, valor, aoSelecionar }: { horarios: string[]; ocupados: string[]; valor: string; aoSelecionar: (horario: string) => void }) {
+  return <label>Horário
+    <select value={valor} onChange={e => aoSelecionar(e.target.value)}>
+      <option value="">Escolha um horário</option>
+      {horarios.map(horario => <option key={horario} value={horario} disabled={ocupados.includes(horario)}>
+        {horario}{ocupados.includes(horario) ? " · Ocupado" : ""}
+      </option>)}
+    </select>
+  </label>;
 }
 export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:boolean;googleId?:string;nonce?:string}){
  const [googlePronto,setGooglePronto]=useState(false);
@@ -224,7 +224,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
        return;
       }
       if(carros.length===0){setVoltandoDaGaragem(true);trocarSecao("veiculos")}}}>Quero agendar</button></div></section>})()}
-     {etapaServico==="agendar"&&servicoAtual&&<section className="agendar-servico"><button className="voltar-servicos" onClick={()=>setEtapaServico("detalhes")}>← Voltar aos detalhes</button><div className="pagina-intro"><p className="dash-etiqueta">RESERVAR HORÁRIO</p><h1>{servicoAtual.nome}</h1><p>{reais(servicoAtual.precoCentavos)} · {servicoAtual.duracaoMinutos} minutos</p></div>{carros.length===0?<div className="sem-carro"><div><strong>Cadastre um carro para continuar</strong><p>O modelo e a placa são necessários para concluir a reserva.</p></div><button className="primario" onClick={()=>{setVoltandoDaGaragem(true);trocarSecao("veiculos")}}>Ir para meus veículos</button></div>:<div className="agendar-form"><label>Veículo<select value={veiculo} onChange={e=>setVeiculo(e.target.value)}>{carros.map(c=><option key={c.id} value={c.id}>{c.modelo} · {c.placa}</option>)}</select></label><label>Dia da lavagem<input type="date" min={hoje} value={data} onChange={e=>{setData(e.target.value);setHora("");setHorarios([]);setOcupados([])}}/></label><div className="horarios-bloco"><h3>Escolha o horário</h3>{!data?<p>Escolha uma data para consultar os horários.</p>:horarios.length===0?<p>Não há horários neste dia.</p>:<><p>Escolha uma hora no relógio e depois os minutos. Horários apagados já estão reservados.</p><SeletorHorario key={`${servico}-${data}`} horarios={horarios} ocupados={ocupados} valor={hora} aoSelecionar={setHora}/></>}</div><button className="primario" disabled={!veiculo||!data||!hora} onClick={agendar}>Confirmar agendamento</button></div>}</section>}
+     {etapaServico==="agendar"&&servicoAtual&&<section className="agendar-servico"><button className="voltar-servicos" onClick={()=>setEtapaServico("detalhes")}>← Voltar aos detalhes</button><div className="pagina-intro"><p className="dash-etiqueta">RESERVAR HORÁRIO</p><h1>{servicoAtual.nome}</h1><p>{reais(servicoAtual.precoCentavos)} · {servicoAtual.duracaoMinutos} minutos</p></div>{carros.length===0?<div className="sem-carro"><div><strong>Cadastre um carro para continuar</strong><p>O modelo e a placa são necessários para concluir a reserva.</p></div><button className="primario" onClick={()=>{setVoltandoDaGaragem(true);trocarSecao("veiculos")}}>Ir para meus veículos</button></div>:<div className="agendar-form"><label>Veículo<select value={veiculo} onChange={e=>setVeiculo(e.target.value)}>{carros.map(c=><option key={c.id} value={c.id}>{c.modelo} · {c.placa}</option>)}</select></label><label>Dia da lavagem<input type="date" min={hoje} value={data} onChange={e=>{setData(e.target.value);setHora("");setHorarios([]);setOcupados([])}}/></label><div className="horarios-bloco"><h3>Escolha o horário</h3>{!data?<p>Escolha uma data para consultar os horários.</p>:horarios.length===0?<p>Não há horários neste dia.</p>:<><p>Selecione um dos horários disponíveis. Horários ocupados não podem ser escolhidos.</p><SeletorHorario key={`${servico}-${data}`} horarios={horarios} ocupados={ocupados} valor={hora} aoSelecionar={setHora}/></>}</div><button className="primario" disabled={!veiculo||!data||!hora} onClick={agendar}>Confirmar agendamento</button></div>}</section>}
     </>}
     {secao==="veiculos"&&<>
      <section className="pagina-intro"><p className="dash-etiqueta">GARAGEM</p><h1>Meus veículos</h1><p>Cadastre seus carros para agilizar os próximos agendamentos.</p></section>
