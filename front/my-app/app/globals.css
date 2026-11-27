@@ -324,3 +324,6 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 .confirmar-servico .modal-acoes{border-top:0;margin-top:26px;padding-top:0;gap:10px}
 .confirmar-servico .modal-acoes button{flex:1;min-height:46px;border-radius:9px;font-weight:600}
 @media(max-width:600px){.modal-fundo:has(.confirmar-servico){align-items:center;padding:20px}.confirmar-servico{padding:24px}.confirmar-servico .modal-acoes{flex-direction:row}}
+
+.agenda-cartao[data-lavagem="em_andamento"] { border: 2px solid #22834c; }
+.agenda-cartao[data-lavagem="proximo"] { border: 2px solid #d4a200; }

@@ -144,7 +144,9 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(1);
   const [data, setData] = useState(hoje);
-  const [reservas, setReservas] = useState<Reserva[] | null>(null);
+  const consulta = new URLSearchParams(historico ? {visao: "historico", categoria, busca, pagina: String(pagina)} : {visao: "ativos", data, pagina: String(pagina)}).toString();
+  const [cache, setCache] = useState(() => new Map<string, Reserva[]>());
+  const reservas = cache.get(consulta);
   const [erro, setErro] = useState("");
   const [erroConsulta, setErroConsulta] = useState("");
   const [versao, setVersao] = useState(0);
@@ -152,7 +154,6 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
   const [selecionada,setSelecionada]=useState<Reserva|null>(null);
   const [salvandoStatus,setSalvandoStatus]=useState(false);
   useEffect(() => {
-    const params = new URLSearchParams(historico ? {visao: "historico", categoria, busca, pagina: String(pagina)} : {visao: "ativos", data, pagina: String(pagina)});
     let versaoExibida: string | undefined;
     return acompanharDados(async signal => {
       let versaoAtual: string | undefined;
@@ -161,26 +162,31 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
           "agendamentos/novidades?versao=" + encodeURIComponent(versaoExibida ?? ""),
           "GET", undefined, signal);
         versaoAtual = resposta.versao;
-        if (versaoAtual === versaoExibida) return null;
+        if (versaoAtual !== undefined && versaoAtual === versaoExibida) return null;
       } catch (e) {
         if (signal.aborted) throw e;
         // A lista continua disponível quando a conexão de novidades falha.
       }
-      const lista = await requisitar<Reserva[]>("agendamentos?" + params, "GET", undefined, signal);
+      const lista = await requisitar<Reserva[]>("agendamentos?" + consulta, "GET", undefined, signal);
       return {lista, versaoAtual};
     }, resultado => {
       if (resultado) {
         versaoExibida = resultado.versaoAtual;
-        setReservas(resultado.lista);
+        setCache(anterior => {
+          const novo = new Map(anterior);
+          novo.delete(consulta);
+          novo.set(consulta, resultado.lista);
+          if (novo.size > 20) novo.delete(novo.keys().next().value!);
+          return novo;
+        });
         setSelecionada(atual => resultado.lista.find(r => r.id === atual?.id) ?? null);
       }
       setErroConsulta("");
     }, e => setErroConsulta(mensagem(e)), 1000);
-  }, [data, versao, requisitar, historico, categoria, busca, pagina]);
+  }, [consulta, versao, requisitar]);
   function atualizar(dia: string) {
     if (!dia) return;
     setErro("");
-    setReservas(null);
     setPagina(1);
     setData(dia);
     setVersao((v) => v + 1);
@@ -191,14 +197,14 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
     try {
       await requisitar(`agendamentos/${reserva.id}/status`, "PUT", { status });
       setSelecionada(null);
-      setReservas(null); setVersao(v => v + 1);
+      setVersao(v => v + 1);
     } catch (e) { setErro(mensagem(e)); }
     finally { setSalvandoStatus(false); }
   }
   async function alterarLavagem(status: Reserva["lavagemStatus"]) {
     if (!selecionada) return;
     setSalvandoStatus(true); setErro("");
-    try { await requisitar(`agendamentos/${selecionada.id}/lavagem`, "PUT", {status}); setSelecionada(null); setReservas(null); setVersao(v=>v+1); }
+    try { await requisitar(`agendamentos/${selecionada.id}/lavagem`, "PUT", {status}); setSelecionada(null); setVersao(v=>v+1); }
     catch(e) { setErro(mensagem(e)); }
     finally { setSalvandoStatus(false); }
   }
@@ -220,8 +226,8 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
         <div>
           <h1>{historico ? "Histórico de atendimentos" : "Agenda do dia"}</h1>
         </div>
-        {historico && <label>Atendimentos<select value={categoria} onChange={e => { setCategoria(e.target.value); setPagina(1); setReservas(null); }}><option value="concluidos">Concluídos</option><option value="cancelados">Cancelados</option></select></label>}
-        {historico ? <label>Pesquisar no histórico<input type="search" placeholder="Cliente, placa, modelo ou serviço" value={busca} onChange={e => {setBusca(e.target.value); setPagina(1); setReservas(null);}} /></label> : <div className="acoes-agenda"><button className="primario" onClick={() => setAbrirAgendamento(true)}>+ Agendar</button><div className="navegar-dia">
+        {historico && <label>Atendimentos<select value={categoria} onChange={e => { setCategoria(e.target.value); setPagina(1); }}><option value="concluidos">Concluídos</option><option value="cancelados">Cancelados</option></select></label>}
+        {historico ? <label>Pesquisar no histórico<input type="search" placeholder="Cliente, placa, modelo ou serviço" value={busca} onChange={e => {setBusca(e.target.value); setPagina(1); }} /></label> : <div className="acoes-agenda"><button className="primario" onClick={() => setAbrirAgendamento(true)}>+ Agendar</button><div className="navegar-dia">
           <label htmlFor="data-agenda">Data da agenda</label>
           <div>
             <button className="secundario" aria-label="Dia anterior" onClick={() => atualizar(deslocarDia(data, -1))}>‹</button>
@@ -232,11 +238,12 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
         </div></div>}
       </div>
       <div className="quadro">
-        {erro || erroConsulta ? (
+        {(erro || erroConsulta) && (
           <div className="vazio" role="alert">
             {erro || erroConsulta}
           </div>
-        ) : !reservas ? (
+        )}
+        {!reservas ? (
           <div className="vazio" role="status">
             Carregando reservas…
           </div>
@@ -251,7 +258,7 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
         ) : (
           <div className="agenda-cartoes">
             {reservas.slice(0,50).map(r => (
-              <article key={r.id} className="agenda-cartao" data-status={r.status}>
+              <article key={r.id} className="agenda-cartao" data-status={r.status} data-lavagem={historico || r.status === "cancelado" ? undefined : r.lavagemStatus}>
                 <span className="agenda-cartao-topo"><span className="agenda-hora">{historico && r.data.split("-").reverse().join("/") + " · "}{r.inicio} <small>– {r.fim}</small></span><span className={`status-agenda status-${r.status}`}>{historico ? (r.status === "cancelado" ? "Cancelado" : "Concluído") : r.status === "pendente" ? "Pendente" : r.status === "confirmado" ? "Confirmado" : "Cancelado"}</span></span>
                 <span className="agenda-cliente">{r.cliente}</span>
                 <span className="agenda-veiculo">{r.modelo || r.veiculo || "Veículo não informado"}{r.placa ? ` · ${r.placa}` : ""}</span>
@@ -272,7 +279,7 @@ function Agenda({ requisitar, historico = false }: { requisitar: Requisitar; his
           </div>
         )}
       </div>
-      {reservas && (pagina > 1 || reservas.length > 50) && <div className="acoes"><button type="button" className="secundario" disabled={pagina === 1} onClick={() => {setReservas(null);setPagina(pagina-1)}}>Anterior</button><span>Página {pagina}</span><button type="button" className="secundario" disabled={reservas.length <= 50} onClick={() => {setReservas(null);setPagina(pagina+1)}}>Próxima</button></div>}
+      {reservas && (pagina > 1 || reservas.length > 50) && <div className="acoes"><button type="button" className="secundario" disabled={pagina === 1} onClick={() => {setPagina(pagina-1)}}>Anterior</button><span>Página {pagina}</span><button type="button" className="secundario" disabled={reservas.length <= 50} onClick={() => {setPagina(pagina+1)}}>Próxima</button></div>}
       {selecionada && <div className="modal-fundo" onMouseDown={e => { if (e.target === e.currentTarget) setSelecionada(null); }}><section className="modal-detalhes" role="dialog" aria-modal="true" aria-labelledby="titulo-detalhes"><div className="modal-topo"><div><p className="dash-etiqueta">AGENDAMENTO #{selecionada.id}</p><h2 id="titulo-detalhes">Detalhes da reserva</h2></div><button className="texto" onClick={() => setSelecionada(null)} aria-label="Fechar detalhes">Fechar</button></div><dl className="detalhes-grid"><div><dt>Cliente</dt><dd>{selecionada.cliente}</dd></div><div><dt>E-mail</dt><dd>{selecionada.email || "Não informado"}</dd></div><div><dt>Veículo</dt><dd>{selecionada.modelo || selecionada.veiculo}</dd></div><div><dt>Placa</dt><dd>{selecionada.placa || "Não informada"}</dd></div><div><dt>Cor</dt><dd>{selecionada.cor || "Não informada"}</dd></div><div><dt>Serviço</dt><dd>{selecionada.servico}</dd></div><div><dt>Dia e horário</dt><dd>{selecionada.data} · {selecionada.inicio}–{selecionada.fim}</dd></div><div><dt>Preço</dt><dd>{(selecionada.precoCentavos/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</dd></div><div><dt>Reserva</dt><dd>{selecionada.status}</dd></div><div><dt>Chegada</dt><dd>{selecionada.chegou ? "Cliente chegou" : selecionada.status === "confirmado" ? <button className="primario" disabled={salvandoStatus} onClick={registrarChegada}>Marcar que chegou</button> : "Aguardando confirmação"}</dd></div><div><dt>Andamento da lavagem</dt><dd>{etapasDisponiveis.length ? (
                 <div className="etapas-lavagem" role="group" aria-label="Andamento da lavagem">
                   {etapasDisponiveis.map(etapa => (
