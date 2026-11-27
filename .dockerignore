@@ -17,5 +17,4 @@ docker-compose.yml
 .aws
 front/
 
-frontc/
 backups/
