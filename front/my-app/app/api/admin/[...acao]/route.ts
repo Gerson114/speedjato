@@ -88,7 +88,8 @@ async function encaminhar(req: NextRequest, context: Context) {
   if (process.env.GATEWAY_TOKEN) {
     headers.set("X-Gateway-Token", process.env.GATEWAY_TOKEN);
     const nome = process.env.TRUSTED_CLIENT_IP_HEADER;
-    const ip = nome && req.headers.get(nome)?.trim();
+    const bruto = (nome && req.headers.get(nome)) || req.headers.get("x-forwarded-for");
+    const ip = bruto?.split(",").at(-1)?.trim();
     if (ip && isIP(ip)) headers.set("X-Client-IP", ip);
   }
   if (method !== "GET" && method !== "DELETE" && path !== "sair") {

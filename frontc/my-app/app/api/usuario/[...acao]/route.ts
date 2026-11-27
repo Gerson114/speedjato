@@ -29,7 +29,8 @@ async function encaminhar(req:NextRequest,{params}:Context){
  const headers=new Headers();if(cookie)headers.set("Cookie","token="+encodeURIComponent(cookie.value));if(process.env.GATEWAY_TOKEN)headers.set("X-Gateway-Token",process.env.GATEWAY_TOKEN);
  if (process.env.GATEWAY_TOKEN) {
    const nome = process.env.TRUSTED_CLIENT_IP_HEADER;
-   const ip = nome && req.headers.get(nome)?.trim();
+   const bruto = (nome && req.headers.get(nome)) || req.headers.get("x-forwarded-for");
+   const ip = bruto?.split(",").at(-1)?.trim();
    if (ip && isIP(ip)) headers.set("X-Client-IP", ip);
  }
  if(method!=="GET" && path!=="sair"){if(req.headers.get("content-type")?.split(";")[0]!=="application/json")return NextResponse.json({error:"Envie JSON"},{status:415});headers.set("Content-Type","application/json")}
