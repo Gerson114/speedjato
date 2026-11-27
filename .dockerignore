@@ -15,6 +15,4 @@ docker-compose.yml
 .agents
 .codex
 .aws
-front/
-
 backups/
