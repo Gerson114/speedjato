@@ -109,13 +109,13 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
   setErro("");
   setOcupado(true);
   const google = (window as Window & {google?: {accounts: {oauth2: {
-   initCodeClient(config: {client_id:string;scope:string;ux_mode:"popup";
-    callback:(res:{code?:string})=>void;error_callback:()=>void}): {requestCode():void}
+   initCodeClient(config: {client_id:string;scope:string;ux_mode:"popup";select_account:boolean;
+    callback:(res:{code?:string})=>void;error_callback:(erro:{type:string})=>void}): {requestCode():void}
   }}}}).google;
   try {
    if (!google) throw Error("Google indisponível");
    google.accounts.oauth2.initCodeClient({
-    client_id:googleId, scope:"openid email profile", ux_mode:"popup",
+    client_id:googleId, scope:"openid email profile", ux_mode:"popup", select_account:true,
     callback:async ({code})=>{
      try {
       if (!code) throw Error("Login com Google cancelado.");
@@ -124,7 +124,12 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
      } catch(e) {setErro((e as Error).message);}
      finally {setOcupado(false);}
     },
-    error_callback:()=>{setOcupado(false);setErro("Login interrompido. Abra o seletor de contas para tentar novamente.");}
+    error_callback:({type})=>{
+     setOcupado(false);
+     if (type === "popup_failed_to_open") setErro("Permita pop-ups para este site e clique novamente em Entrar com Google.");
+     else if (type === "popup_closed") setErro("A janela do Google foi fechada antes de concluir o login. Tente novamente.");
+     else setErro("Falha na comunicação com a janela do Google. Tente novamente ou entre com e-mail e senha.");
+    }
    }).requestCode();
   } catch {setOcupado(false);setErro("Não foi possível abrir o Google.");}
  }

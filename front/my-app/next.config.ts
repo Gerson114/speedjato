@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  allowedDevOrigins: process.env.LAVA_REDE_IPS?.split(","),
   experimental: {
     agentFeedback: true,
     useTypeScriptCli: false,

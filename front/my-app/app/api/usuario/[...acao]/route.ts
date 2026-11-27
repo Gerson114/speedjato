@@ -7,14 +7,9 @@ async function encaminhar(req:NextRequest,{params}:Context){
  const permitido=login||cadastro||(path==="sair"&&method==="POST")||(path==="servicos"&&method==="GET")||(path==="veiculos"&&["GET","POST"].includes(method))||(path==="agendamentos"&&["GET","POST"].includes(method))||(path==="avisos"&&method==="GET")||(path==="horarios"&&method==="GET")||(path==="disponibilidade"&&method==="GET");
  if(!permitido)return NextResponse.json({error:"Rota inválida"},{status:404});
   const origin = req.headers.get("origin");
-  const origemDeTeste = process.env.NODE_ENV === "development" &&
-    process.env.LAVA_REDE_IPS?.split(",").some(ip =>
-      origin === `http://${ip}:${process.env.LAVA_REDE_PORTA}` &&
-      req.headers.get("host") === `${ip}:${process.env.LAVA_REDE_PORTA}`
-    );
   if (
     method !== "GET" &&
-    ((origin && !origemDeTeste && origin !== (process.env.APP_ORIGIN || req.nextUrl.origin)) ||
+    ((origin && origin !== (process.env.APP_ORIGIN || req.nextUrl.origin)) ||
       req.headers.get("sec-fetch-site") === "cross-site")
   ) {
     return NextResponse.json(

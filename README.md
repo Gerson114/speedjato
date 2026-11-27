@@ -90,7 +90,7 @@ A confirmação retorna `201` com o número da reserva e o horário de término.
 
 ## Adicionar funcionalidades
 
-Registre seus endpoints em `SetupRoutes`, em `internal/router/router.go`. A função recebe o contexto da aplicação, o roteador Gin e o pool `*sql.DB`. A conexão com o banco fica em `external/db`. Para rodar os testes, use `go test ./...`.
+Registre seus endpoints em `SetupRoutes`, em `internal/router/router.go`. A função recebe o contexto da aplicação, o roteador Gin e o pool `*sql.DB`. A conexão com o banco fica em `external/db`.
 
 Os middlewares em `internal/middleware` aplicam CORS, cabeçalhos de segurança, limites por IP, concorrência, tamanho de corpo e prazo da requisição. Em desenvolvimento, `GATEWAY_TOKEN` é opcional. Com o gateway ativo, o proxy envia `X-Gateway-Token` e pode identificar o IP do cliente com `X-Client-IP`.
 
@@ -126,7 +126,7 @@ proxy_set_header X-Forwarded-Proto $scheme;
 proxy_read_timeout 30s;
 ```
 
-Os processos Next.js devem ser acessíveis somente pelo proxy confiável. Se houver CDN ou outro proxy antes do Nginx, configure os endereços confiáveis nesse proxy antes de usar o IP recebido. Configure os domínios reais e TLS no proxy, e use `npm run build` seguido de `npm run start` nos painéis. O script `dev-rede.mjs` é destinado aos testes locais.
+Os processos Next.js devem ser acessíveis somente pelo proxy confiável. Se houver CDN ou outro proxy antes do Nginx, configure os endereços confiáveis nesse proxy antes de usar o IP recebido. Configure os domínios reais e TLS no proxy, e use `npm run build` seguido de `npm run start` nos painéis.
 
 A reserva cancelada é preservada e um reagendamento recebe novo ID. Repetições da reserva ativa continuam retornando o mesmo registro. O PostgreSQL mantém uma versão da agenda dentro da transação de cada alteração. Cada painel administrativo que espera novidades consulta essa versão a cada 2 segundos; a carga dessas consultas aumenta com o número de painéis abertos.
 
@@ -136,16 +136,7 @@ A reserva cancelada é preservada e um reagendamento recebe novo ID. Repetiçõe
 
 A migração 008 cria índices para histórico e consultas por cliente. Como as migrações rodam em transação, a criação dos índices pode bloquear gravações enquanto é executada; em um banco com muitos agendamentos, planeje uma janela de manutenção e faça backup antes da atualização.
 
-## Testes de integração e backup
-
-```sh
-./scripts/testar-producao.sh
-node scripts/proxy-ip.test.cjs
-```
-
-O primeiro comando cria um PostgreSQL descartável, aplica migrações, testa reagendamento, pedidos concorrentes, capacidade, permissões de andamento, sincronização entre conexões e rollback de uma falha de gravação. Também cria um backup e o restaura em outro banco descartável, verificando dados e migrações. Requer Docker e acesso às imagens e dependências. Não conecta ao banco configurado no `.env` da aplicação.
-
-Para executar a integração em um PostgreSQL de testes já disponível, defina `LAVA_TEST_DATABASE_URL` como URL `postgres://...` e rode `go test -race -count=1 ./internal/agenda`. O teste cria e remove um schema próprio. Sem essa variável, esse teste é marcado como ignorado.
+## Backup do banco
 
 `./scripts/backup-banco.sh` gera um arquivo `pg_dump` em `backups/`, com permissões restritas. Programe sua execução no servidor e copie os arquivos para armazenamento fora da máquina, com retenção definida. A pasta local e o volume do PostgreSQL precisam de proteção contra perda do host. Valide a restauração de backups reais em um banco separado antes de uma atualização importante.
 

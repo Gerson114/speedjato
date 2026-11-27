@@ -9,7 +9,6 @@ import (
 	"lava/internal/registro/auth"
 	"log/slog"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
@@ -34,9 +33,6 @@ func Registrar(r *gin.Engine, db *sql.DB, local *time.Location) {
 	admin.POST("/agendamentos/balcao", a.agendarBalcao)
 	admin.PUT("/agendamentos/:id/chegada", a.registrarChegada)
 	admin.PUT("/agendamentos/:id/status", a.atualizarStatus)
-	if os.Getenv("APP_ENV") != "production" {
-		admin.POST("/agendamentos/teste", a.agendamentoTeste)
-	}
 	admin.GET("/resumo", a.resumo)
 	admin.GET("/relatorios", a.relatorios)
 	admin.PUT("/agendamentos/:id/lavagem", a.atualizarLavagem)

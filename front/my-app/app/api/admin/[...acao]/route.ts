@@ -8,14 +8,9 @@ async function encaminhar(req: NextRequest, context: Context) {
   const path = acao.join("/");
   const method = req.method;
   const origin = req.headers.get("origin");
-  const origemDeTeste = process.env.NODE_ENV === "development" &&
-    process.env.LAVA_REDE_IPS?.split(",").some(ip =>
-      origin === `http://${ip}:${process.env.LAVA_REDE_PORTA}` &&
-      req.headers.get("host") === `${ip}:${process.env.LAVA_REDE_PORTA}`
-    );
   if (
     method !== "GET" &&
-    ((origin && !origemDeTeste && origin !== (process.env.APP_ORIGIN || req.nextUrl.origin)) ||
+    ((origin && origin !== (process.env.APP_ORIGIN || req.nextUrl.origin)) ||
       req.headers.get("sec-fetch-site") === "cross-site")
   ) {
     return NextResponse.json(
@@ -84,7 +79,7 @@ async function encaminhar(req: NextRequest, context: Context) {
   const headers = new Headers();
   if (!login && sessao)
     headers.set("Cookie", "admin_token=" + encodeURIComponent(sessao.value));
-  if (origin) headers.set("Origin", origemDeTeste ? "http://localhost:3100" : origin);
+  if (origin) headers.set("Origin", origin);
   if (process.env.GATEWAY_TOKEN) {
     headers.set("X-Gateway-Token", process.env.GATEWAY_TOKEN);
     const nome = process.env.TRUSTED_CLIENT_IP_HEADER;

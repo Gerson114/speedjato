@@ -8,14 +8,9 @@ async function encaminhar(req:NextRequest,{params}:Context){
  if(!permitido)return NextResponse.json({error:"Rota inválida"},{status:404});
   const origin = req.headers.get("origin");
   if (path === "google" && (!origin || req.headers.get("x-requested-with") !== "XMLHttpRequest")) return NextResponse.json({error:"Origem não permitida"},{status:403});
-  const origemDeTeste = process.env.NODE_ENV === "development" &&
-    process.env.LAVA_REDE_IPS?.split(",").some(ip =>
-      origin === `http://${ip}:${process.env.LAVA_REDE_PORTA}` &&
-      req.headers.get("host") === `${ip}:${process.env.LAVA_REDE_PORTA}`
-    );
   if (
     method !== "GET" &&
-    ((origin && !origemDeTeste && origin !== (process.env.APP_ORIGIN || req.nextUrl.origin)) ||
+    ((origin && origin !== (process.env.APP_ORIGIN || req.nextUrl.origin)) ||
       req.headers.get("sec-fetch-site") === "cross-site")
   ) {
     return NextResponse.json(
