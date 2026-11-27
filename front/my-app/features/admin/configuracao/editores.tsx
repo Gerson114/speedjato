@@ -1,5 +1,5 @@
-import { fecharModal } from "../fechar-modal";
 "use client";
+import { fecharModal } from "../fechar-modal";
 
 import { acompanhar } from "../../acompanhar";
 import { useEffect, useRef, useState, type FormEvent } from "react";
