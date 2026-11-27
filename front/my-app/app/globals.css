@@ -388,3 +388,22 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 
 .logo-speedjato { display: block; width: 112px; height: auto; filter: drop-shadow(0 1px 1px #15243899); }
 .topbar-marca .logo-speedjato { width: 72px; }
+
+/* Acesso administrativo */
+.login { max-width: none; background: #f4f7fb; padding: 20px; gap: 20px; }
+.login-lado { background: #fff; border: 1px solid #e3e9f1; border-radius: 20px; }
+.login .identidade { align-items: center; }
+.login .acesso { max-width: 400px; }
+.login .acesso h1 { font-size: clamp(2.4rem, 3.3vw, 3.6rem); letter-spacing: -.055em; color: #102d50; }
+.login .icone-bloco { background: #eaf1fa; color: #174e86; }
+.login .acesso input { height: 52px; border-color: #cbd6e3; font-size: 16px; }
+.login .acesso input:focus-visible { outline: 3px solid #9bbde2; border-color: #2363a0; }
+.login .senha .icone { height: 46px; }
+.login .acesso .primario { min-height: 52px; width: 100%; justify-content: center; }
+.login .foto { border-radius: 20px; }
+@media (max-width: 760px) {
+  .login { display: flex; padding: 0; background: #fff; }
+  .login-lado { width: 100%; min-height: 100svh; border: 0; border-radius: 0; padding: 24px 24px 40px; }
+  .login .acesso { padding: 36px 0 64px; }
+  .login .acesso h1 { font-size: clamp(2.5rem, 10vw, 3.4rem); }
+}

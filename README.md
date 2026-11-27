@@ -146,7 +146,7 @@ No Dokploy, selecione Docker Compose, use a raiz do repositório como diretório
 
 Configure `ADMIN_ORIGIN` e `CLIENTE_ORIGIN` com as duas origens HTTPS públicas, sem barra final. Defina `POSTGRES_PASSWORD`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`. Gere valores independentes para `JWT_SECRET` e `GATEWAY_TOKEN` executando `openssl rand -hex 32` uma vez para cada variável.
 
-No Dokploy, configure um domínio HTTPS para o serviço `admin` na porta interna 3000 e outro para `cliente`, também na porta 3000. A API e o banco não precisam de domínio público. Configure o proxy para encaminhar o IP real pelo cabeçalho `X-Real-IP`, e mantenha `TRUSTED_CLIENT_IP_HEADER=X-Real-IP` nos painéis.
+No Dokploy, configure um domínio HTTPS para o serviço `admin` na porta interna 3000 e outro para `cliente`, também na porta 3000. A API e o banco não precisam de domínio público. Configure o proxy para encaminhar o IP real e defina `TRUSTED_CLIENT_IP_HEADER` com o cabeçalho confiável que ele fornece. O padrão é `X-Forwarded-For`; se o proxy fornecer `X-Real-IP`, defina `TRUSTED_CLIENT_IP_HEADER=X-Real-IP` no ambiente do Compose. Garanta que o proxy substitua esse cabeçalho recebido de fora e que os painéis não sejam acessíveis diretamente.
 
 ```sh
 docker compose -f compose.template.yml config --quiet
