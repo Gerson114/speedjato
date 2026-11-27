@@ -16,3 +16,10 @@ docker-compose.yml
 .codex
 .aws
 backups/
+
+**/.env
+**/.env.*
+**/node_modules
+**/.next
+**/*.pem
+**/*.key

@@ -40,13 +40,13 @@ func GatewayToken() gin.HandlerFunc {
 			// Se o proxy não repassar o IP do visitante, use o IP da conexão
 			// com o gateway para evitar rejeitar toda a requisição. Em produção,
 			// isso pode agrupar limites por IP para clientes atrás do mesmo front.
-			fallback, fallbackErr := netip.ParseAddr(c.ClientIP())
-			if fallbackErr != nil || fallback.IsUnspecified() || fallback.IsMulticast() {
+			fallback, fallbackErr := netip.ParseAddrPort(c.Request.RemoteAddr)
+			if fallbackErr != nil || fallback.Addr().IsUnspecified() || fallback.Addr().IsMulticast() {
 				// O gateway já autenticou a chamada. Sem IP válido do proxy ou
 				// da conexão, agrupe a cota pela identidade do gateway.
 				c.Set("gateway_client_ip", "gateway")
 			} else {
-				c.Set("gateway_client_ip", fallback.Unmap().String())
+				c.Set("gateway_client_ip", fallback.Addr().Unmap().String())
 			}
 		}
 		c.Next()

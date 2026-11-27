@@ -20,7 +20,7 @@ func TestGatewayNaoAceitaIPForjadoSemSegredo(t *testing.T) {
 		status    int
 	}{
 		{"", "198.51.100.1", 403}, {"errado", "198.51.100.1", 403},
-		{key, "", 400}, {key, "0.0.0.0", 400}, {key, "198.51.100.1,198.51.100.2", 400}, {key, "198.51.100.1", 200},
+		{key, "", 200}, {key, "0.0.0.0", 200}, {key, "198.51.100.1,198.51.100.2", 200}, {key, "198.51.100.1", 200},
 	} {
 		req := httptest.NewRequest("GET", "/privado", nil)
 		req.Header.Set("X-Gateway-Token", tc.token)
@@ -31,7 +31,11 @@ func TestGatewayNaoAceitaIPForjadoSemSegredo(t *testing.T) {
 		if w.Code != tc.status {
 			t.Fatalf("IP %q: esperava %d, recebeu %d", tc.ip, tc.status, w.Code)
 		}
-		if tc.status == 200 && w.Body.String() != tc.ip {
+		expected := tc.ip
+		if tc.ip == "" || tc.ip == "0.0.0.0" || strings.Contains(tc.ip, ",") {
+			expected = "192.0.2.1" // Endereço da conexão de httptest.NewRequest.
+		}
+		if tc.status == 200 && w.Body.String() != expected {
 			t.Fatal("IP não autenticado foi utilizado")
 		}
 	}
