@@ -37,8 +37,15 @@ func GatewayToken() gin.HandlerFunc {
 		if err == nil && ip.Zone() == "" && !ip.IsUnspecified() && !ip.IsMulticast() {
 			c.Set("gateway_client_ip", ip.Unmap().String())
 		} else if os.Getenv("GATEWAY_CLIENT_IP_REQUIRED") == "true" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "IP do cliente ausente ou inválido"})
-			return
+			// Se o proxy não repassar o IP do visitante, use o IP da conexão
+			// com o gateway para evitar rejeitar toda a requisição. Em produção,
+			// isso pode agrupar limites por IP para clientes atrás do mesmo front.
+			fallback, fallbackErr := netip.ParseAddr(c.ClientIP())
+			if fallbackErr != nil || fallback.IsUnspecified() || fallback.IsMulticast() {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "IP do cliente ausente ou inválido"})
+				return
+			}
+			c.Set("gateway_client_ip", fallback.Unmap().String())
 		}
 		c.Next()
 	}
