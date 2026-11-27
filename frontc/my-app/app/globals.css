@@ -206,3 +206,24 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
   .topbar-marca .simbolo { display: inline-flex; }
   .topbar-marca .simbolo i { height: 15px; width: 3px; background: currentColor; }
 }
+
+.selecao-agendamento{display:grid;gap:6px;font-weight:600;font-size:.9rem}
+.selecao-agendamento button{width:100%;min-height:48px;padding:12px 14px;text-align:left;border:1px solid var(--linha);border-radius:6px;background:#fff;color:var(--tinta)}
+.seletor-fundo{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,20,30,.56);animation:cliente-fundo-entrar .2s ease-out}
+.seletor-modal{width:min(440px,100%);max-height:90dvh;overflow:auto;padding:24px;background:#fff;border-radius:14px;animation:cliente-modal-entrar .3s ease-out}
+.seletor-topo,.calendario-topo{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.seletor-topo button,.calendario-topo button{width:44px;height:44px;border:0;border-radius:8px;background:#f0f3f6;color:var(--tinta);font-size:1.5rem}
+.seletor-veiculos{display:grid;gap:10px;margin-top:20px}
+.seletor-veiculos button{display:grid;gap:4px;text-align:left;padding:15px;border:1px solid var(--linha);border-radius:8px;background:#fff;color:var(--tinta)}
+.seletor-veiculos button[aria-pressed=true]{border-color:#174f87;background:#eef5fc}
+.seletor-veiculos span{color:var(--suave);font-size:.85rem}
+.calendario{margin-top:18px}.calendario-topo strong{text-transform:capitalize}
+.calendario-grade{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:14px;text-align:center}
+.calendario-grade span{padding:10px 0;color:var(--suave);font-size:.8rem}.calendario-grade button{min-height:42px;border:0;border-radius:8px;background:transparent;color:var(--tinta)}
+.calendario-grade button[aria-pressed=true]{background:#123d6a;color:white}.calendario-grade button:disabled{opacity:.3;cursor:not-allowed}
+@keyframes cliente-entrar{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cliente-fundo-entrar{from{opacity:0}to{opacity:1}}
+@keyframes cliente-modal-entrar{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.cliente-pagina :is(.servico-card,.servico-detalhe,.agendar-servico,.veiculo-item,.historico-lista article,.avisos-lista article){animation:cliente-entrar .35s ease-out both}
+@media(max-width:700px){.seletor-fundo{align-items:flex-end;padding:0}.seletor-modal{width:100%;border-radius:16px 16px 0 0;padding:22px 20px max(22px,env(safe-area-inset-bottom));animation:cliente-modal-entrar .35s ease-out}}
+@media(prefers-reduced-motion:reduce){.seletor-fundo,.seletor-modal,.cliente-pagina :is(.servico-card,.servico-detalhe,.agendar-servico,.veiculo-item,.historico-lista article,.avisos-lista article){animation:none}}

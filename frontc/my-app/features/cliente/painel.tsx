@@ -19,7 +19,29 @@ function SeletorHorario({ horarios, ocupados, valor, aoSelecionar }: { horarios:
     </select>
   </label>;
 }
+function Calendario({ hoje, valor, selecionar }: { hoje: string; valor: string; selecionar: (dia: string) => void }) {
+  const [mes, setMes] = useState(() => (valor || hoje).slice(0, 7));
+  const [ano, numeroMes] = mes.split("-").map(Number);
+  const primeiroDia = new Date(Date.UTC(ano, numeroMes - 1, 1)).getUTCDay();
+  const diasNoMes = new Date(Date.UTC(ano, numeroMes, 0)).getUTCDate();
+  function mudarMes(delta: number) {
+    const proximo = new Date(Date.UTC(ano, numeroMes - 1 + delta, 1));
+    setMes(`${proximo.getUTCFullYear()}-${String(proximo.getUTCMonth() + 1).padStart(2, "0")}`);
+  }
+  const titulo = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(ano, numeroMes - 1, 1)));
+  return <div className="calendario">
+    <div className="calendario-topo"><button type="button" onClick={() => mudarMes(-1)} aria-label="Mês anterior">‹</button><strong>{titulo}</strong><button type="button" onClick={() => mudarMes(1)} aria-label="Próximo mês">›</button></div>
+    <div className="calendario-grade">{["D", "S", "T", "Q", "Q", "S", "S"].map((dia, i) => <span key={i}>{dia}</span>)}
+      {Array.from({ length: primeiroDia }, (_, i) => <span key={`vazio-${i}`} />)}
+      {Array.from({ length: diasNoMes }, (_, i) => {
+        const dia = `${mes}-${String(i + 1).padStart(2, "0")}`;
+        return <button type="button" key={dia} disabled={dia < hoje} aria-pressed={dia === valor} aria-label={new Intl.DateTimeFormat("pt-BR", { dateStyle: "full", timeZone: "UTC" }).format(new Date(`${dia}T12:00:00Z`))} onClick={() => selecionar(dia)}>{i + 1}</button>;
+      })}
+    </div>
+  </div>;
+}
 export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:boolean;googleId?:string;nonce?:string}){
+ const [seletorAberto, setSeletorAberto] = useState<"veiculo" | "data" | null>(null);
  const [googlePronto,setGooglePronto]=useState(false);
  const [autenticando, setAutenticando] = useState(false);
  const [carregandoCatalogo, setCarregandoCatalogo] = useState(true);
@@ -208,6 +230,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
   </aside>
   <div className="cliente-conteudo">
    <header className="cliente-topbar"><button className="menu-toggle" onClick={()=>setMenuAberto(true)} aria-label="Abrir menu" aria-controls="menu-cliente" aria-expanded={menuAberto}><span/><span/><span/></button><div><p className="dash-etiqueta">ÁREA DO CLIENTE</p><strong>{secao==="servicos"?"Agende sua lavagem":secao==="veiculos"?"Meus veículos":secao==="agendamentos"?"Meus agendamentos":secao==="conta"?"Minha conta":"Avisos e lembretes"}</strong></div><span className="topbar-marca"><span className="simbolo" aria-hidden="true"><i/><i/><i/></span>SpeedJato</span></header>
+   {seletorAberto && <div className="seletor-fundo" onMouseDown={e => { if (e.target === e.currentTarget) setSeletorAberto(null); }} onKeyDown={e => { if (e.key === "Escape") setSeletorAberto(null); }}><section className="seletor-modal" role="dialog" aria-modal="true" aria-labelledby="seletor-titulo"><div className="seletor-topo"><h2 id="seletor-titulo">{seletorAberto === "veiculo" ? "Escolha seu veículo" : "Escolha o dia"}</h2><button type="button" autoFocus onClick={() => setSeletorAberto(null)} aria-label="Fechar">×</button></div>{seletorAberto === "veiculo" ? <div className="seletor-veiculos">{carros.map(c => <button type="button" key={c.id} aria-pressed={String(c.id) === veiculo} onClick={() => { setVeiculo(String(c.id)); setSeletorAberto(null); }}><strong>{c.modelo}</strong><span>{c.placa}{c.cor ? ` · ${c.cor}` : ""}</span></button>)}</div> : <Calendario hoje={hoje} valor={data} selecionar={dia => { setData(dia); setHora(""); setHorarios([]); setOcupados([]); setSeletorAberto(null); }} />}</section></div>}
    <div className="cliente-pagina">
     {erro&&<p role="alert" className="erro">{erro}</p>}{mensagem&&<p role="status" className="sucesso">{mensagem}</p>}
     {secao==="servicos"&&<>
@@ -224,7 +247,7 @@ export default function PainelCliente({comCookie,googleId,nonce}:{comCookie:bool
        return;
       }
       if(carros.length===0){setVoltandoDaGaragem(true);trocarSecao("veiculos")}}}>Quero agendar</button></div></section>})()}
-     {etapaServico==="agendar"&&servicoAtual&&<section className="agendar-servico"><button className="voltar-servicos" onClick={()=>setEtapaServico("detalhes")}>← Voltar aos detalhes</button><div className="pagina-intro"><p className="dash-etiqueta">RESERVAR HORÁRIO</p><h1>{servicoAtual.nome}</h1><p>{reais(servicoAtual.precoCentavos)} · {servicoAtual.duracaoMinutos} minutos</p></div>{carros.length===0?<div className="sem-carro"><div><strong>Cadastre um carro para continuar</strong><p>O modelo e a placa são necessários para concluir a reserva.</p></div><button className="primario" onClick={()=>{setVoltandoDaGaragem(true);trocarSecao("veiculos")}}>Ir para meus veículos</button></div>:<div className="agendar-form"><label>Veículo<select value={veiculo} onChange={e=>setVeiculo(e.target.value)}>{carros.map(c=><option key={c.id} value={c.id}>{c.modelo} · {c.placa}</option>)}</select></label><label>Dia da lavagem<input type="date" min={hoje} value={data} onChange={e=>{setData(e.target.value);setHora("");setHorarios([]);setOcupados([])}}/></label><div className="horarios-bloco"><h3>Escolha o horário</h3>{!data?<p>Escolha uma data para consultar os horários.</p>:horarios.length===0?<p>Não há horários neste dia.</p>:<><p>Selecione um dos horários disponíveis. Horários ocupados não podem ser escolhidos.</p><SeletorHorario key={`${servico}-${data}`} horarios={horarios} ocupados={ocupados} valor={hora} aoSelecionar={setHora}/></>}</div><button className="primario" disabled={!veiculo||!data||!hora} onClick={agendar}>Confirmar agendamento</button></div>}</section>}
+     {etapaServico==="agendar"&&servicoAtual&&<section className="agendar-servico"><button className="voltar-servicos" onClick={()=>setEtapaServico("detalhes")}>← Voltar aos detalhes</button><div className="pagina-intro"><p className="dash-etiqueta">RESERVAR HORÁRIO</p><h1>{servicoAtual.nome}</h1><p>{reais(servicoAtual.precoCentavos)} · {servicoAtual.duracaoMinutos} minutos</p></div>{carros.length===0?<div className="sem-carro"><div><strong>Cadastre um carro para continuar</strong><p>O modelo e a placa são necessários para concluir a reserva.</p></div><button className="primario" onClick={()=>{setVoltandoDaGaragem(true);trocarSecao("veiculos")}}>Ir para meus veículos</button></div>:<div className="agendar-form"><div className="selecao-agendamento"><span>Veículo</span><button type="button" onClick={()=>setSeletorAberto("veiculo")}>{carros.find(c=>String(c.id)===veiculo)?.modelo || "Escolher veículo"} {carros.find(c=>String(c.id)===veiculo)?.placa && `· ${carros.find(c=>String(c.id)===veiculo)?.placa}`}</button></div><div className="selecao-agendamento"><span>Dia da lavagem</span><button type="button" onClick={()=>setSeletorAberto("data")}>{data ? data.split("-").reverse().join("/") : "Escolher uma data"}</button></div><div className="horarios-bloco"><h3>Escolha o horário</h3>{!data?<p>Escolha uma data para consultar os horários.</p>:horarios.length===0?<p>Não há horários neste dia.</p>:<><p>Selecione um dos horários disponíveis. Horários ocupados não podem ser escolhidos.</p><SeletorHorario key={`${servico}-${data}`} horarios={horarios} ocupados={ocupados} valor={hora} aoSelecionar={setHora}/></>}</div><button className="primario" disabled={!veiculo||!data||!hora} onClick={agendar}>Confirmar agendamento</button></div>}</section>}
     </>}
     {secao==="veiculos"&&<>
      <section className="pagina-intro"><p className="dash-etiqueta">GARAGEM</p><h1>Meus veículos</h1><p>Cadastre seus carros para agilizar os próximos agendamentos.</p></section>
