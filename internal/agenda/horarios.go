@@ -82,7 +82,7 @@ func (c Configuracao) vagas(dia time.Time, duracao int, reservas []periodo, agor
 		}
 		inicio, _ := minuto(h.Abre)
 		fim, _ := minuto(h.Fecha)
-		for m := inicio; m+duracao <= fim; m += c.Intervalo {
+		for m := inicio; m+duracao <= fim; m += duracao {
 			if lotados[m+duracao] == lotados[m] && dia.Add(time.Duration(m)*time.Minute).After(agora) {
 				inicios[m] = true
 			}
@@ -108,7 +108,7 @@ func (c Configuracao) horarios(dia time.Time, duracao int, agora time.Time) []st
 		}
 		inicio, _ := minuto(h.Abre)
 		fim, _ := minuto(h.Fecha)
-		for m := inicio; m+duracao <= fim; m += c.Intervalo {
+		for m := inicio; m+duracao <= fim; m += duracao {
 			if dia.Add(time.Duration(m) * time.Minute).After(agora) {
 				inicios[m] = true
 			}
