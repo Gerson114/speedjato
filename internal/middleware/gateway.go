@@ -42,10 +42,12 @@ func GatewayToken() gin.HandlerFunc {
 			// isso pode agrupar limites por IP para clientes atrás do mesmo front.
 			fallback, fallbackErr := netip.ParseAddr(c.ClientIP())
 			if fallbackErr != nil || fallback.IsUnspecified() || fallback.IsMulticast() {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "IP do cliente ausente ou inválido"})
-				return
+				// O gateway já autenticou a chamada. Sem IP válido do proxy ou
+				// da conexão, agrupe a cota pela identidade do gateway.
+				c.Set("gateway_client_ip", "gateway")
+			} else {
+				c.Set("gateway_client_ip", fallback.Unmap().String())
 			}
-			c.Set("gateway_client_ip", fallback.Unmap().String())
 		}
 		c.Next()
 	}
