@@ -227,3 +227,11 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 .cliente-pagina :is(.servico-card,.servico-detalhe,.agendar-servico,.veiculo-item,.historico-lista article,.avisos-lista article){animation:cliente-entrar .35s ease-out both}
 @media(max-width:700px){.seletor-fundo{align-items:flex-end;padding:0}.seletor-modal{width:100%;border-radius:16px 16px 0 0;padding:22px 20px max(22px,env(safe-area-inset-bottom));animation:cliente-modal-entrar .35s ease-out}}
 @media(prefers-reduced-motion:reduce){.seletor-fundo,.seletor-modal,.cliente-pagina :is(.servico-card,.servico-detalhe,.agendar-servico,.veiculo-item,.historico-lista article,.avisos-lista article){animation:none}}
+
+.seletor-horarios > p{margin:12px 0 18px;color:var(--suave);font-size:.9rem}
+.grade-horarios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grade-horarios button{display:grid;gap:3px;justify-items:center;min-height:64px;padding:10px 4px;border:1px solid #dce5ef;border-radius:9px;background:#f8fafc;color:#123d6a}
+.grade-horarios button span{font-size:.7rem;font-weight:500;color:#62758a}
+.grade-horarios button[aria-pressed=true]{background:#123d6a;border-color:#123d6a;color:#fff}
+.grade-horarios button[aria-pressed=true] span{color:#e2ecf5}
+.grade-horarios button:disabled{opacity:.45;cursor:not-allowed;background:#f0f1f2;color:#717a84}
