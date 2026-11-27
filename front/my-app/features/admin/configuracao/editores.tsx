@@ -93,6 +93,11 @@ export function Servicos({ requisitar }: { requisitar: Requisitar }) {
     e.preventDefault();
     if (!edicao || !dados || enviando.current) return;
     const f = new FormData(e.currentTarget);
+    const duracaoMinutos = Number(f.get("duracaoHoras")) * 60 + Number(f.get("duracaoMinutos"));
+    if (duracaoMinutos < 1 || duracaoMinutos > 1440) {
+      setErro("Informe uma duração entre 1 minuto e 24 horas.");
+      return;
+    }
     enviando.current = true;
     setSalvando(true);
     setErro("");
@@ -104,7 +109,7 @@ export function Servicos({ requisitar }: { requisitar: Requisitar }) {
         {
           ...(!edicao.id && { chaveCriacao: chaveCriacao.current }),
           nome: String(f.get("nome")).trim(),
-          duracaoMinutos: Number(f.get("duracao")),
+          duracaoMinutos,
           precoCentavos: Math.round(Number(f.get("preco")) * 100),
           descricao: String(f.get("descricao")).trim(),
           produtoIds: f.getAll("produtoIds").map(Number),
@@ -157,17 +162,13 @@ export function Servicos({ requisitar }: { requisitar: Requisitar }) {
                 defaultValue={edicao.nome}
               />
             </label>
-            <label>
-              Duração (min)
-              <input
-                name="duracao"
-                type="number"
-                required
-                min={1}
-                max={1440}
-                defaultValue={edicao.duracaoMinutos}
-              />
-            </label>
+            <fieldset className="duracao-servico">
+              <legend>Duração</legend>
+              <div>
+                <label>Horas<input name="duracaoHoras" type="number" inputMode="numeric" min={0} max={24} step={1} required defaultValue={Math.floor(edicao.duracaoMinutos / 60)} /></label>
+                <label>Minutos<input name="duracaoMinutos" type="number" inputMode="numeric" min={0} max={59} step={1} required defaultValue={edicao.duracaoMinutos % 60} /></label>
+              </div>
+            </fieldset>
             <label>Preço (R$)<input name="preco" type="number" min="0" step="0.01" required defaultValue={(edicao.precoCentavos/100).toFixed(2)}/></label>
           </div>
           <div className="servico-campos">

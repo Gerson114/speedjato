@@ -313,6 +313,10 @@ body,.cliente-shell{background:#f5f6f8;color:#111820}.primario{background:#102d5
 @media(min-width:1024px){.cliente-shell{background:#f5f6f8}.menu-cliente{background:#101820;border-color:#101820}.menu-links button.ativo{background:#fff;box-shadow:inset 3px 0 #102d50}.servicos-cards{background:#dce0e5;border-color:#dce0e5}}
 
 .catalogo-acoes{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.duracao-servico > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.duracao-servico legend { font-weight: 600; }
+.duracao-servico label { min-width: 0; }
+.duracao-servico input { width: 100%; }
 
 .confirmar-servico{width:min(440px,100%);margin:0;background:#fff;padding:30px;border:1px solid var(--linha);border-radius:18px;box-shadow:0 20px 70px rgb(0 0 0 / 14%)}
 .confirmar-servico-icone{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#faeeee;color:#a32737;margin-bottom:20px}
